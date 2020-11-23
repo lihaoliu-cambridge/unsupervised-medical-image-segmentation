@@ -1,4 +1,2 @@
-# Probabilistic-Multilayer-Regularization-Network
-Code for 《Probabilistic Multilayer Regularization Network for Unsupervised 3D Brain Image Registration》
-
-This code is developed based on Voxelmorph.
+# Unsupervised Medical Image Segmentation
+Code for 《Contrastive Registration for Unsupervised Medical Image Segmentation》
