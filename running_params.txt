@@ -1,0 +1,8 @@
+Training:
+python train.py          --no_html --dataroot ./datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small       --dataset_mode lpba40_contrastive_learning           --batchSize 8  --lr 0.003  --model registration_model_contrastive_learning     --name lpba40_contrastive_learning
+
+
+
+Testing:
+python test_dice.py      --no_html --dataroot ./datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small       --dataset_mode lpba40_contrastive_learning           --batchSize 1              --model registration_model_contrastive_learning     --name lpba40_contrastive_learning
+
