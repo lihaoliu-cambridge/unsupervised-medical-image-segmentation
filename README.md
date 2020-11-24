@@ -1,14 +1,13 @@
 # Unsupervised Medical Image Segmentation
 
-by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](https://angelicaiaviles.wordpress.com/), and [Carola-Bibiane Schönlieb](https://www.damtp.cam.ac.uk/user/cbs31/About_Me.html). 
+by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](https://angelicaiaviles.wordpress.com/), and [Carola-Bibiane Schönlieb](https://www.damtp.cam.ac.uk/user/cbs31/About_Me.html).  
 
-<br>
 
 ### Introduction
 
 In repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894). 
 
-<img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Segmentation_Results.png"/>  
+<img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Segmentation_Results.png">  
 
 ### Requirement
 
@@ -49,8 +48,7 @@ opencv-python               4.2.0.32
    `datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small`  
    `datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_small`
    
-   This step aims to standardize the distribute of all images in a similar range:
-   
+   This step aims to standardize the distribute of all images in a similar range:  
    <img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Histogram_Standardization.png" width="360"/>  
    
    
@@ -65,7 +63,6 @@ opencv-python               4.2.0.32
 6. Test the saved model:
  
    ```shell
-   cd ..
    python test_dice.py  --no_html  --dataroot ./datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small  --dataset_mode lpba40_contrastive_learning  --batchSize 1  --model registration_model_contrastive_learning  --name lpba40_contrastive_learning
 
 
