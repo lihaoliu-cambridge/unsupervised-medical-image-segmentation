@@ -3,13 +3,14 @@
 by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](https://angelicaiaviles.wordpress.com/), and [Carola-Bibiane Schönlieb](https://www.damtp.cam.ac.uk/user/cbs31/About_Me.html).  
 
 
-### Introduction
+## Introduction
 
 In repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894). 
 
 <img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Segmentation_Results.png">  
 
-### Requirement
+
+## Requirement
 
 torch                       1.5.0  
 torchvision                 0.4.2  
@@ -17,7 +18,7 @@ SimpleITK                   1.2.4
 opencv-python               4.2.0.32  
 
 
-### Usage
+## Usage
 
 1. Clone the repository:
 
@@ -69,7 +70,7 @@ opencv-python               4.2.0.32
    ```
 
 
-### Citation
+## Citation
 
 If you use our code for your research, please cite our paper:
 
@@ -83,6 +84,6 @@ If you use our code for your research, please cite our paper:
 ```
 
 
-### Question
+## Question
 
 Please open an issue or email 'lhliu1994@gmail.com' for any question.
