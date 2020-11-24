@@ -5,7 +5,7 @@ by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](
 
 ## Introduction
 
-In repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894). 
+In this repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894). 
 
 <img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Segmentation_Results.png">  
 
