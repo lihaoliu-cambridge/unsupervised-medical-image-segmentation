@@ -6,7 +6,7 @@ by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](
 
 ### Introduction
 
-In repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894).  
+In repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894). 
 
 
 ### Requirement
@@ -48,7 +48,7 @@ opencv-python               4.2.0.32
    `datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small`  
    `datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_small`
    
-3. Train the model:
+5. Train the model:
  
    ```shell
    cd ..
@@ -56,8 +56,17 @@ opencv-python               4.2.0.32
 
    ```
 
+6. Test the saved model:
+ 
+   ```shell
+   cd ..
+   python test_dice.py  --no_html  --dataroot ./datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small  --dataset_mode lpba40_contrastive_learning  --batchSize 1  --model registration_model_contrastive_learning  --name lpba40_contrastive_learning
 
-## Citation
+
+   ```
+
+
+### Citation
 
 If you use our code for your research, please cite our paper:
 
