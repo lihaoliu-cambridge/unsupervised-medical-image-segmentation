@@ -1,14 +1,15 @@
-<br>
 # Unsupervised Medical Image Segmentation
 
 by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](https://angelicaiaviles.wordpress.com/), and [Carola-Bibiane Schönlieb](https://www.damtp.cam.ac.uk/user/cbs31/About_Me.html). 
 
 <br>
+
 ### Introduction
 
 In repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894).
 
 <br>
+
 ### Requirement
 
 torch                       1.5.0
@@ -17,6 +18,7 @@ SimpleITK                   1.2.4
 opencv-python               4.2.0.32
 
 <br>
+
 ### Usage
 
 1. Clone the repository:
@@ -29,7 +31,6 @@ opencv-python               4.2.0.32
 2. Download the images and segmentation masks for LPBA40 dataset.
 
    LPBA40 Images: [LPBA40_rigidly_registered_pairs.tar.gz](https://www.synapse.org/#!Synapse:syn3251419)
-   
    LPBA40 Labels: [LPBA40_rigidly_registered_label_pairs.tar.gz](https://www.synapse.org/#!Synapse:syn3251070)
    
 3. Unzip them in folder `datasets/LPBA40`.
@@ -58,9 +59,11 @@ opencv-python               4.2.0.32
    ```
    
 <br>
+
 ## Citation
 
 If you use our code for your research, please cite our paper:
+
 ```
 @article{liu2020contrastive,
   title={Contrastive Registration for Unsupervised Medical Image Segmentation},
@@ -71,6 +74,7 @@ If you use our code for your research, please cite our paper:
 ```
 
 <br>
+
 ### Question
 
 Please open an issue or email 'lhliu1994@gmail.com' for any question.
