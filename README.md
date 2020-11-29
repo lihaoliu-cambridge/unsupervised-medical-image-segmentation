@@ -7,7 +7,7 @@ by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](
 
 In this repository, we provide the PyTorch implementation for [Contrastive Registration for Unsupervised Medical Image Segmentation](https://arxiv.org/abs/2011.08894). 
 
-<img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Segmentation_Results.png">  
+<img src="https://github.com/lihaoliu-cambridge/lihaoliu-cambridge.github.io/blob/master/pic/papers/unsupervised-segmentation-results.png">  
 
 
 ## Requirement
@@ -50,7 +50,7 @@ opencv-python               4.2.0.32
    `datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_small`
    
    This step aims to standardize the distribute of all images in a similar range:  
-   <img src="https://github.com/lihaoliu-cambridge/unsupervised-medical-image-segmentation/blob/master/imgs/Histogram_Standardization.png" width="360"/>  
+   <img src="https://github.com/lihaoliu-cambridge/lihaoliu-cambridge.github.io/blob/master/pic/papers/unsupervised-segmentation-histogram_standardization.png" width="360"/>  
    
    
 5. Train the model:
