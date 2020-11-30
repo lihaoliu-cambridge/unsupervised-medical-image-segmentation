@@ -27,17 +27,17 @@ opencv-python               4.2.0.32
    cd unsupervised-medical-image-segmentation
    ```
    
-2. Download the images and segmentation masks for LPBA40 dataset.
+2. Download the images and segmentation masks for LPBA40 dataset:
 
    LPBA40 Images: [LPBA40_rigidly_registered_pairs.tar.gz](https://www.synapse.org/#!Synapse:syn3251419)  
    LPBA40 Labels: [LPBA40_rigidly_registered_label_pairs.tar.gz](https://www.synapse.org/#!Synapse:syn3251070)  
    
-3. Unzip them in folder `datasets/LPBA40`.
+3. Unzip them in folder `datasets/LPBA40`:
 
    `datasets/LPBA40/LPBA40_rigidly_registered_pairs`  
    `datasets/LPBA40/LPBA40_rigidly_registered_label_pairs`  
    
-4. Pre-process the LPBA40 dataset.
+4. Pre-process the LPBA40 dataset:
 
    ```shell
    cd scripts
