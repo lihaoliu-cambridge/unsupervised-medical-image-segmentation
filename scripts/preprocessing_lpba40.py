@@ -253,12 +253,12 @@ def plot_hist(image_path_hs='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_
 
 
 if __name__ == '__main__':
-    # mapping = calculate_landmarks(image_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs')
-    mapping = np.asarray([1.77635684e-15, 4.02863140e+01, 5.86044434e+01, 6.33688576e+01, 6.66438972e+01, 7.12987107e+01, 7.53526276e+01, 7.96537020e+01, 8.43034770e+01, 8.67112286e+01, 8.91208850e+01, 9.35115887e+01, 1.00000000e+02])
+    mapping = calculate_landmarks(image_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs')
+    # mapping = np.asarray([1.77635684e-15, 4.02863140e+01, 5.86044434e+01, 6.33688576e+01, 6.66438972e+01, 7.12987107e+01, 7.53526276e+01, 7.96537020e+01, 8.43034770e+01, 8.67112286e+01, 8.91208850e+01, 9.35115887e+01, 1.00000000e+02])
 
-    # histogram_stardardization_resample_center_crop(mapping=mapping,
-    #                                                input_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs',
-    #                                                output_path_hs_small='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small',
-    #                                                output_path_mask='../datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_small')
+    histogram_stardardization_resample_center_crop(mapping=mapping,
+                                                   input_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs',
+                                                   output_path_hs_small='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small',
+                                                   output_path_mask='../datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_small')
 
     plot_hist()
