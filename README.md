@@ -1,6 +1,6 @@
 # Unsupervised Medical Image Segmentation
 
-by [Lihao Liu](http://lihaoliu-cambridge.github.io), [Angelica I Aviles-Rivero](https://angelicaiaviles.wordpress.com/), and [Carola-Bibiane Schönlieb](https://www.damtp.cam.ac.uk/user/cbs31/About_Me.html).  
+by Lihao Liu, Angelica I Aviles-Rivero, and Carola-Bibiane Schönlieb.  
 
 
 ## Introduction
