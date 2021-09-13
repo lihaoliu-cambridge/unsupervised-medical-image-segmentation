@@ -23,8 +23,8 @@ class UNet(nn.Module):
         self.conv_maxpool3 = torch.nn.MaxPool3d(kernel_size=2)
 
         self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        self.linear1 = torch.nn.Linear(64, 64)
-        self.linear2 = torch.nn.Linear(64, 64)
+        self.linear_x = torch.nn.Linear(64, 64)
+        self.linear_y = torch.nn.Linear(64, 64)
 
         # Bottleneck
         mid_channel = 128
@@ -133,9 +133,8 @@ class UNet(nn.Module):
         encode_pool3_x = self.conv_maxpool3(encode_block3_x)
         f_x = self.avgpool(encode_pool3_x)
         f_x = f_x.squeeze()
-        f_x = self.linear1(f_x)
-        f_x = F.relu(f_x)
-        f_x = self.linear2(f_x)
+        f_x = self.linear_x(f_x)
+        f_x= f_x / f_x.norm(dim=-1, keepdim=True)
 
         # Encode 2
         encode_block1_y = self.conv_encode1(y)
@@ -146,9 +145,8 @@ class UNet(nn.Module):
         encode_pool3_y = self.conv_maxpool3(encode_block3_y)
         f_y = self.avgpool(encode_pool3_y)
         f_y = f_y.squeeze()
-        f_y = self.linear1(f_y)
-        f_y = F.relu(f_y)
-        f_y = self.linear2(f_y)
+        f_y = self.linear_y(f_y)
+        f_y = f_y / f_y.norm(dim=-1, keepdim=True)
 
         # Bottleneck
         bottleneck1 = self.bottleneck(torch.cat((encode_pool3_x, encode_pool3_y), 1))
