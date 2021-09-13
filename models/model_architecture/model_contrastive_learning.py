@@ -134,7 +134,7 @@ class UNet(nn.Module):
         f_x = self.avgpool(encode_pool3_x)
         f_x = f_x.squeeze()
         f_x = self.linear_x(f_x)
-        f_x= f_x / f_x.norm(dim=-1, keepdim=True)
+        f_x = f_x / f_x.norm(dim=-1, keepdim=True)
 
         # Encode 2
         encode_block1_y = self.conv_encode1(y)
