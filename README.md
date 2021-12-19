@@ -68,12 +68,6 @@ opencv-python               4.2.0.32
 
 
    ```
-  
-  
-## Note
-
-Current model is built based on CVPR-2018 version VoxelMorph (without the probabilistic model and smooth loss).
-
 
 ## Citation
 
