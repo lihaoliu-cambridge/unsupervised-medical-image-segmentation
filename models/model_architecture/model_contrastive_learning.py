@@ -35,25 +35,15 @@ class UNet(nn.Module):
             torch.nn.Conv3d(kernel_size=3, in_channels=mid_channel * 2, out_channels=mid_channel, padding=1),
             torch.nn.BatchNorm3d(mid_channel),
             torch.nn.ReLU(),
-            torch.nn.ConvTranspose3d(in_channels=mid_channel, out_channels=mid_channel, kernel_size=3, stride=2,
-                                     padding=1, output_padding=1),
-            torch.nn.BatchNorm3d(mid_channel),
-            torch.nn.ReLU(),
+            torch.nn.Upsample(scale_factor=2, mode='trilinear', align_corners=True)
         )
 
         # Decode
         self.conv_decode3 = self.expansive_block(256, 128, 64)
         self.conv_decode2 = self.expansive_block(128, 64, 32)
-        self.final_layer = self.final_block(64, 32, 16)
+        self.final_layer = self.final_block(64, 32, 3)
 
         self._init_weight()
-
-        self.flow = torch.nn.Conv3d(kernel_size=3, in_channels=16, out_channels=out_channel, padding=1)
-
-        # Make flow weights + bias small. Not sure this is necessary.
-        nd = Normal(0, 1e-5)
-        self.flow.weight = nn.Parameter(nd.sample(self.flow.weight.shape))
-        self.flow.bias = nn.Parameter(torch.zeros(self.flow.bias.shape))
 
     def contracting_block(self, in_channels, out_channels, kernel_size=3):
         """
@@ -161,28 +151,55 @@ class UNet(nn.Module):
         decode_block1 = self.crop_and_concat(cat_layer1, torch.cat([encode_block1_x, encode_block1_y], 1))
         final_layer = self.final_layer(decode_block1)
 
-        final_layer = self.flow(final_layer)
-
         return final_layer, f_x, f_y
+
+
+class ProbabilisticModel(nn.Module):
+    def __init__(self):
+        super(ProbabilisticModel, self).__init__()
+
+        self.mean = torch.nn.Conv3d(in_channels=3, out_channels=3, kernel_size=3, padding=1)
+        self.log_sigma = torch.nn.Conv3d(in_channels=3, out_channels=3, kernel_size=3, padding=1)
+        self.noise = Normal(0, 1)
+
+        # Manual Initialization
+        nd_mean = Normal(0, 1e-5)
+        self.mean.weight = nn.Parameter(nd_mean.sample(self.mean.weight.shape))
+
+        nd_log_sigma = Normal(0, 1e-10)
+        self.log_sigma.weight = nn.Parameter(nd_log_sigma.sample(self.log_sigma.weight.shape))
+        self.log_sigma.bias = nn.Parameter(torch.zeros(self.log_sigma.bias.shape)*(-10.))
+
+    def forward(self, final_layer):
+        flow_mean = self.mean(final_layer)
+        flow_log_sigma = self.log_sigma(final_layer)
+        noise = self.noise.sample(flow_mean.size())
+
+        flow = flow_mean + torch.exp(flow_log_sigma / 2.0) * noise.cuda()
+
+        return flow, flow_mean, flow_log_sigma
 
 
 class VoxelMorph3d(nn.Module):
     def __init__(self, in_channels=2, use_gpu=False, img_size=(72, 96, 72)):
         super(VoxelMorph3d, self).__init__()
         self.unet = UNet(in_channels, 3)
+        self.probabilistic_model = ProbabilisticModel()
         self.spatial_transform = SpatialTransformer(img_size)
 
         if use_gpu:
             self.unet = self.unet.cuda()
+            self.probabilistic_model = self.probabilistic_model.cuda()
             self.spatial_transform = self.spatial_transform.cuda()
 
     def forward(self, moving_image, fixed_image, moving_atlas):
-        deformation_matrix, f_x, f_y = self.unet(moving_image, fixed_image)
+        flow, f_x, f_y = self.unet(moving_image, fixed_image)
 
+        deformation_matrix, flow_mean, flow_log_sigma = self.probabilistic_model(flow)
         warped_image = self.spatial_transform(moving_image, deformation_matrix)
         warped_image_atlas = self.spatial_transform(moving_atlas, deformation_matrix, mode="nearest")
 
-        return warped_image, warped_image_atlas, deformation_matrix, f_x, f_y
+        return warped_image, warped_image_atlas, deformation_matrix, flow_mean, flow_log_sigma, f_x, f_y
 
 
 class SpatialTransformer(nn.Module):

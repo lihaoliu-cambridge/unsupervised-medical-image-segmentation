@@ -63,9 +63,13 @@ class RegistrationModel(BaseModel):
                                                          mode=net_mode)
 
         if self.isTrain:
-            self.criterionRecon = networks.recon_loss()
+            # # CVPR 2018
+            # self.criterionRecon = networks.recon_loss()
+            # self.criterionSmooth = networks.smooth_loss()
 
-            self.criterionSmooth = networks.smooth_loss()
+            # MICCAI 2018
+            self.criterionRecon = networks.lamda_mse_loss()
+            self.criterionSmooth = networks.kl_loss()
 
             self.criterionContrastive = networks.contrastive_loss(batch_size=opt.batchSize)
 
@@ -122,13 +126,19 @@ class RegistrationModel(BaseModel):
         self.input_fixed_atlas = Variable(self.fixed_atlas).cuda()
 
     def backward_Reg(self):
-        wrapped_image, _, flow, \
+        wrapped_image, _, flow, flow_mean, flow_log_sigma, \
         contrastive_features_x, contrastive_features_y = self.netReg(self.input_moving, self.input_fixed, self.input_moving_atlas)
         contrastive_features_x = F.normalize(contrastive_features_x, dim=1)
         contrastive_features_y = F.normalize(contrastive_features_y, dim=1)
 
+        # # CVPR 2018
+        # self.loss_recon = self.criterionRecon(wrapped_image, self.fixed)
+        # self.loss_smooth = 0.01 * self.criterionSmooth(flow)
+
+        # MICCAI 2018
         self.loss_recon = self.criterionRecon(wrapped_image, self.fixed)
-        self.loss_smooth = 0.01 * self.criterionSmooth(flow)
+        self.loss_smooth = self.criterionSmooth(flow_mean, flow_log_sigma)
+
         self.loss_contrastive = 0.01 * self.criterionContrastive(contrastive_features_x, contrastive_features_y)
 
         # backward
@@ -155,7 +165,7 @@ class RegistrationModel(BaseModel):
             self.input_moving_atlas = Variable(self.moving_atlas).cuda()
             self.input_fixed_atlas = Variable(self.fixed_atlas).cuda()
 
-            _, segmentation_result, flow, _, _ = self.netReg(
+            _, segmentation_result, flow, _, _, _, _ = self.netReg(
                 self.input_fixed, self.input_moving, self.input_fixed_atlas)
 
             # ~~~~~~~~~~~~~~~~~ Evaluation. ~~~~~~~~~~~~~~~~~
