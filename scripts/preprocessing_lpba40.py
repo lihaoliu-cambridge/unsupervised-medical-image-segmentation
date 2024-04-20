@@ -235,6 +235,55 @@ def histogram_stardardization_resample_center_crop(mapping,
             output_path_hs_small_atlas = os.path.join(output_path_mask, 'l{}_to_l{}.nii'.format(str(i), str(j)))
             sitk.WriteImage(new_atlas, str(output_path_hs_small_atlas))
 
+
+def histogram_stardardization_center_crop(mapping,
+                                                   input_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs',
+                                                   output_path_hs='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_large',
+                                                   output_path_mask='../datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_large'):
+    if not os.path.exists(str(output_path_hs)):
+        os.makedirs(str(output_path_hs))
+    if not os.path.exists(str(output_path_mask)):
+        os.makedirs(str(output_path_mask))
+
+    for i in list(range(1, 41, 1)):
+        for j in list(range(1, 41, 1)):
+            # ~~~~~~~~~~~~~~~ images ~~~~~~~~~~~~~~~
+            volpath = os.path.join(input_path, 'l{}_to_l{}.nii'.format(str(i), str(j)))
+            img_sitk = sitk.ReadImage(str(volpath))
+            img_np = sitk.GetArrayFromImage(img_sitk).swapaxes(0, 2)
+
+            mask = img_np > 0
+
+            # 1. histogram_stardardization
+            img_np_hs = normalize(img_np, mapping, mask)
+
+            # 2. center_crop
+            img_crop = center_crop(img=img_np_hs, size_ratio=(160, 212, 160)).swapaxes(0, 2)
+            new_img = sitk.GetImageFromArray(img_crop)
+            new_img.SetSpacing(img_sitk.GetSpacing())
+            new_img.SetDirection(img_sitk.GetDirection())
+            new_img.SetOrigin(img_sitk.GetOrigin())
+
+            output_path_hs_img = os.path.join(output_path_hs, 'l{}_to_l{}.nii'.format(str(i), str(j)))
+            sitk.WriteImage(new_img, str(output_path_hs_img))
+
+            # ~~~~~~~~~~~~~~~ masks ~~~~~~~~~~~~~~~
+            atlas_path = volpath.replace('LPBA40_rigidly_registered_pairs', 'LPBA40_rigidly_registered_label_pairs')
+            atlas = sitk.ReadImage(str(atlas_path))
+
+            atlas_np = sitk.GetArrayFromImage(atlas).swapaxes(0, 2)
+
+            # 1. center_crop
+            atlas_crop = center_crop(img=atlas_np, size_ratio=(160, 212, 160)).swapaxes(0, 2)
+            new_atlas = sitk.GetImageFromArray(atlas_crop)
+            new_atlas.SetSpacing(atlas.GetSpacing())
+            new_atlas.SetDirection(atlas.GetDirection())
+            new_atlas.SetOrigin(atlas.GetOrigin())
+
+            output_path_hs_atlas = os.path.join(output_path_mask, 'l{}_to_l{}.nii'.format(str(i), str(j)))
+            sitk.WriteImage(new_atlas, str(output_path_hs_atlas))
+
+
 def plot_hist(image_path_hs='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small'):
     for i in list(range(1, 41, 1)):
         for j in list(range(1, 41, 1)):
@@ -255,6 +304,13 @@ def plot_hist(image_path_hs='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_
 if __name__ == '__main__':
     mapping = calculate_landmarks(image_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs')
     # mapping = np.asarray([1.77635684e-15, 4.02863140e+01, 5.86044434e+01, 6.33688576e+01, 6.66438972e+01, 7.12987107e+01, 7.53526276e+01, 7.96537020e+01, 8.43034770e+01, 8.67112286e+01, 8.91208850e+01, 9.35115887e+01, 1.00000000e+02])
+    # mapping = np.load('../datasets/LPBA40/mapping.npy')
+    print(mapping)
+
+    histogram_stardardization_center_crop(mapping=mapping,
+                                          input_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs',
+                                          output_path_hs='../datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_large',
+                                          output_path_mask='../datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_large')
 
     histogram_stardardization_resample_center_crop(mapping=mapping,
                                                    input_path='../datasets/LPBA40/LPBA40_rigidly_registered_pairs',

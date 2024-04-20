@@ -57,10 +57,12 @@ class RegistrationModel(BaseModel):
 
         # load/define networks
         net_mode = 'lpba40' if 'lpba40' in str(opt.dataset_mode) else NotImplementedError
+        img_size = (72, 96, 72) if "small" in opt.dataroot else (144, 192, 144)
         self.netReg = networks.define_registration_model(gpu_ids=self.gpu_ids,
                                                          is_training=self.isTrain,
                                                          model_parallel=opt.model_parallel,
-                                                         mode=net_mode)
+                                                         mode=net_mode,
+                                                         img_size=img_size)
 
         if self.isTrain:
             # # CVPR 2018
@@ -133,7 +135,7 @@ class RegistrationModel(BaseModel):
 
         # # CVPR 2018
         # self.loss_recon = self.criterionRecon(wrapped_image, self.fixed)
-        # self.loss_smooth = 0.01 * self.criterionSmooth(flow)
+        # self.loss_smooth = self.criterionSmooth(flow)
 
         # MICCAI 2018
         self.loss_recon = self.criterionRecon(wrapped_image, self.fixed)
@@ -182,11 +184,11 @@ class RegistrationModel(BaseModel):
                     self.folder_names, self.folder_names)))
 
             sitk.WriteImage(sitk.GetImageFromArray(segmentation_result.data.int().cpu().numpy().squeeze()),
-                            str('/home/ll610/Onepiece/code/project/GANRegSeg/checkpoints/{}/output_{}/seg_of_moving_{}'.format(
+                            str('./checkpoints/{}/output_{}/seg_of_moving_{}'.format(
                                 self.folder_names, self.folder_names, self.moving_paths[0].split('/')[-1])))
 
             sitk.WriteImage(sitk.GetImageFromArray(np.transpose(flow.data.float().squeeze().cpu().numpy(), (1, 2, 3, 0))),
-                            str('/home/ll610/Onepiece/code/project/GANRegSeg/checkpoints/{}/output_{}/deformation_field_{}'.format(
+                            str('./checkpoints/{}/output_{}/deformation_field_{}'.format(
                                 self.folder_names, self.folder_names, self.moving_paths[0].split('/')[-1])))
 
             self.metric_mean_dcs = np.nanmean(dsc)

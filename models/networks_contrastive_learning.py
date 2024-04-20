@@ -67,7 +67,7 @@ def init_net_Seg_data_parallel(net, init_type='kaiming', gpu_ids=None):
     return net
 
 
-def define_registration_model(gpu_ids=None, is_training=True, model_parallel=False, mode='lpba40'):
+def define_registration_model(gpu_ids=None, is_training=True, model_parallel=False, mode='lpba40', img_size=(144, 192, 144)):
     if model_parallel:
         print("model_parallel.")
         raise NotImplementedError
@@ -78,7 +78,7 @@ def define_registration_model(gpu_ids=None, is_training=True, model_parallel=Fal
 
         from .model_architecture.model_contrastive_learning import VoxelMorph3d as model
         if mode == 'lpba40':
-            netSeg = model()
+            netSeg = model(is_training=is_training, img_size=img_size)
         else:
             raise NotImplementedError
 
@@ -101,7 +101,7 @@ class smooth_loss(nn.Module):
             dz = dz * dz
 
         d = torch.mean(dx) + torch.mean(dy) + torch.mean(dz)
-        return d / 3.0
+        return 0.01 * (d / 3.0)
 
 
 class recon_loss(nn.Module):
@@ -112,86 +112,95 @@ class recon_loss(nn.Module):
         return torch.mean( (x - y) ** 2 )
         
 
-# MICCAI 2018 Version 
+# MICCAI 2018 Version - Adpopted from Tensorflow/Keras Implementation
+# class kl_loss(nn.Module):
+#     def __init__(self):
+#         super(kl_loss, self).__init__()
+#         # self.image_sigma = 0.02
+#         # self.prior_lambda = 10.0
+#         self.image_sigma = 0.01
+#         self.prior_lambda = 25.0
+
+#     def __call__(self, flow_mean, flow_sigma):
+#         # print(1, flow_mean.sum())
+#         # print(2, flow_sigma.sum())
+#         ndims = len(flow_mean.shape[2:])
+
+#         D = self._degree_matrix(flow_mean.shape[2:]).cuda()
+#         # print(3, D.sum())
+
+#         # sigma terms
+#         sigma_term = torch.mean(self.prior_lambda * D * torch.exp(flow_sigma.cuda()) - flow_sigma.cuda())
+#         # print(4, sigma_term.sum())
+
+#         # precision terms
+#         # note needs 0.5 twice, one here (inside self.prec_loss), one below
+#         prec_term = self.prior_lambda * self.prec_loss(flow_mean)
+#         # print(5, self.prior_lambda, prec_term)
+
+#         # combine terms
+#         return 0.5 * ndims * (sigma_term + prec_term)  # ndims because we averaged over dimensions as well
+
+#     def _adj_filt(self, ndims):
+#         filt_inner = np.zeros([3] * ndims)
+#         for j in range(ndims):
+#             o = [[1]] * ndims
+#             o[j] = [0, 2]
+#             filt_inner[np.ix_(*o)] = 1
+
+#         # full filter, that makes sure the inner filter is applied
+#         # ith feature to ith feature
+#         filt = np.zeros([ndims, ndims] + [3] * ndims)
+#         for i in range(ndims):
+#             filt[i, i, ...] = filt_inner
+
+#         return filt
+
+#     def _degree_matrix(self, vol_shape):
+#         # get shape stats
+#         ndims = len(vol_shape)
+
+#         conv_fn = nn.Conv3d(in_channels=3, out_channels=3, kernel_size=3, stride=1, padding=1, bias=False)
+#         conv_fn.weight = torch.nn.Parameter(torch.from_numpy(self._adj_filt(ndims)).float())
+#         conv_result = conv_fn(torch.ones([1] + [ndims, *vol_shape]))
+
+#         return conv_result
+
+#     def prec_loss(self, y_pred):
+#         vol_shape = y_pred.shape[2:]
+#         ndims = len(vol_shape)
+
+#         x = y_pred[:, :, 1:, :, :] - y_pred[:, :, :-1, :, :]
+#         x2 = torch.mean(torch.mul(x, x))
+
+#         y = y_pred[:, :, :, 1:, :] - y_pred[:, :, :, :-1, :]
+#         y2 = torch.mean(torch.mul(y, y))
+
+#         z = y_pred[:, :, :, :, 1:] - y_pred[:, :, :, :, :-1]
+#         z2 = torch.mean(torch.mul(z, z))
+
+#         return 0.5 * torch.add(torch.add(x2, y2), z2) / ndims
+
+
 class kl_loss(nn.Module):
     def __init__(self):
         super(kl_loss, self).__init__()
-        # self.image_sigma = 0.02
-        # self.prior_lambda = 10.0
-        self.image_sigma = 0.01
-        self.prior_lambda = 25.0
 
-    def __call__(self, flow_mean, flow_sigma):
-        # print(1, flow_mean.sum())
-        # print(2, flow_sigma.sum())
-        ndims = len(flow_mean.shape[2:])
-
-        D = self._degree_matrix(flow_mean.shape[2:]).cuda()
-        # print(3, D.sum())
-
-        # sigma terms
-        sigma_term = torch.mean(self.prior_lambda * D * torch.exp(flow_sigma.cuda()) - flow_sigma.cuda())
-        # print(4, sigma_term.sum())
-
-        # precision terms
-        # note needs 0.5 twice, one here (inside self.prec_loss), one below
-        prec_term = self.prior_lambda * self.prec_loss(flow_mean)
-        # print(5, self.prior_lambda, prec_term)
-
-        # combine terms
-        return 0.5 * ndims * (sigma_term + prec_term)  # ndims because we averaged over dimensions as well
-
-    def _adj_filt(self, ndims):
-        filt_inner = np.zeros([3] * ndims)
-        for j in range(ndims):
-            o = [[1]] * ndims
-            o[j] = [0, 2]
-            filt_inner[np.ix_(*o)] = 1
-
-        # full filter, that makes sure the inner filter is applied
-        # ith feature to ith feature
-        filt = np.zeros([ndims, ndims] + [3] * ndims)
-        for i in range(ndims):
-            filt[i, i, ...] = filt_inner
-
-        return filt
-
-    def _degree_matrix(self, vol_shape):
-        # get shape stats
-        ndims = len(vol_shape)
-
-        conv_fn = nn.Conv3d(in_channels=3, out_channels=3, kernel_size=3, stride=1, padding=1, bias=False)
-        conv_fn.weight = torch.nn.Parameter(torch.from_numpy(self._adj_filt(ndims)).float())
-        conv_result = conv_fn(torch.ones([1] + [ndims, *vol_shape]))
-
-        return conv_result
-
-    def prec_loss(self, y_pred):
-        vol_shape = y_pred.shape[2:]
-        ndims = len(vol_shape)
-
-        x = y_pred[:, :, 1:, :, :] - y_pred[:, :, :-1, :, :]
-        x2 = torch.mean(torch.mul(x, x))
-
-        y = y_pred[:, :, :, 1:, :] - y_pred[:, :, :, :-1, :]
-        y2 = torch.mean(torch.mul(y, y))
-
-        z = y_pred[:, :, :, :, 1:] - y_pred[:, :, :, :, :-1]
-        z2 = torch.mean(torch.mul(z, z))
-
-        return 0.5 * torch.add(torch.add(x2, y2), z2) / ndims
+    def __call__(self, flow_mean, flow_log_sigma):
+        kl_div = -0.5 * torch.sum(1 + flow_log_sigma - flow_mean.pow(2) - flow_log_sigma.exp(), dim=[1, 2, 3, 4]) 
+        return 0.01 * (kl_div.mean() / (flow_mean.size(0) * flow_mean.size(1) * flow_mean.size(2) * flow_mean.size(3) * flow_mean.size(4)))
 
 
 class lamda_mse_loss(nn.Module):
     def __init__(self):
         super(lamda_mse_loss, self).__init__()
-        self.image_sigma=0.01
+        self.image_sigma=1
 
     def __call__(self, x, y):
         return 1.0 / (self.image_sigma ** 2) * torch.mean( (x - y) ** 2 )
 
-class contrastive_loss(nn.Module):
 
+class contrastive_loss(nn.Module):
     def __init__(self, batch_size=8, temperature=0.5, use_cosine_similarity=True):
         super(contrastive_loss, self).__init__()
         self.batch_size = batch_size
@@ -250,4 +259,4 @@ class contrastive_loss(nn.Module):
         labels = torch.zeros(2 * self.batch_size).cuda().long()
         loss = self.criterion(logits, labels)
 
-        return loss / (2 * self.batch_size)
+        return 0.01 * loss / (2 * self.batch_size)

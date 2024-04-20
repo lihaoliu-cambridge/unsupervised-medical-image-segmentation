@@ -87,7 +87,10 @@ class UNet(nn.Module):
             torch.nn.ReLU(),
             torch.nn.Conv3d(kernel_size=kernel_size, in_channels=mid_channel, out_channels=out_channels, padding=1),
             torch.nn.BatchNorm3d(out_channels),
-            torch.nn.ReLU()
+            # For Probablisitic Model - Softmax is Better
+            torch.nn.Softmax() 
+            # # For Non-Probablisitic Model - Relu is Better
+            # torch.nn.ReLU()
         )
         return block
 
@@ -153,36 +156,37 @@ class UNet(nn.Module):
 
 
 class ProbabilisticModel(nn.Module):
-    def __init__(self):
+    def __init__(self, is_training=True):
         super(ProbabilisticModel, self).__init__()
 
         self.mean = torch.nn.Conv3d(in_channels=3, out_channels=3, kernel_size=3, padding=1)
         self.log_sigma = torch.nn.Conv3d(in_channels=3, out_channels=3, kernel_size=3, padding=1)
-        self.noise = Normal(0, 1)
 
         # Manual Initialization
-        nd_mean = Normal(0, 1e-5)
-        self.mean.weight = nn.Parameter(nd_mean.sample(self.mean.weight.shape))
+        self.mean.weight.data.normal_(0, 1e-5)
+        self.log_sigma.weight.data.normal_(0, 1e-10)
+        self.log_sigma.bias.data.fill_(-10.)
 
-        nd_log_sigma = Normal(0, 1e-10)
-        self.log_sigma.weight = nn.Parameter(nd_log_sigma.sample(self.log_sigma.weight.shape))
-        self.log_sigma.bias = nn.Parameter(torch.zeros(self.log_sigma.bias.shape)*(-10.))
+        self.is_training=is_training
 
     def forward(self, final_layer):
         flow_mean = self.mean(final_layer)
         flow_log_sigma = self.log_sigma(final_layer)
-        noise = self.noise.sample(flow_mean.size())
+        noise = torch.randn_like(flow_mean).cuda()
 
-        flow = flow_mean + torch.exp(flow_log_sigma / 2.0) * noise.cuda()
+        if self.is_training:
+            flow = flow_mean + flow_log_sigma * noise 
+        else:
+            flow = flow_mean + flow_log_sigma # No noise at testing time
 
         return flow, flow_mean, flow_log_sigma
 
 
 class VoxelMorph3d(nn.Module):
-    def __init__(self, in_channels=2, use_gpu=False, img_size=(72, 96, 72)):
+    def __init__(self, in_channels=2, use_gpu=False, is_training=True, img_size=(144, 192, 144)):
         super(VoxelMorph3d, self).__init__()
         self.unet = UNet(in_channels, 3)
-        self.probabilistic_model = ProbabilisticModel()
+        self.probabilistic_model = ProbabilisticModel(is_training=is_training)
         self.spatial_transform = SpatialTransformer(img_size)
 
         if use_gpu:

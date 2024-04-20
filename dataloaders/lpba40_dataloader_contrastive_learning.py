@@ -60,8 +60,12 @@ class LPBA40(BaseDataset):
         self.fixed_img_whiten = {k: self.whitening(v) for k, v in self.fixed_img.items()}
 
         # Transformation
-        self.transform_train = get_transform_train()
-        self.transform_test = get_transform_test()
+        if "large" in self.image_path:
+            self.transform_train = get_transform_train(img_size=(144, 192, 144))
+            self.transform_test = get_transform_test(img_size=(144, 192, 144))
+        elif "small" in self.image_path:
+            self.transform_train = get_transform_train(img_size=(72, 96, 72))
+            self.transform_test = get_transform_test(img_size=(72, 96, 72))
 
     def name(self):
         return 'LPBA40_contrastive_learning'
@@ -78,11 +82,11 @@ class LPBA40(BaseDataset):
             fixed_img = self.fixed_img_whiten[self.moving_fixed[self.moving_path[img_index]]]
 
             moving_atlas = self.readVol(
-                self.moving_path[img_index].replace("LPBA40_rigidly_registered_pairs_histogram_standardization_small",
-                                                    "LPBA40_rigidly_registered_label_pairs_small").replace('.nii', '.hdr'))
+                self.moving_path[img_index].replace("LPBA40_rigidly_registered_pairs_histogram_standardization",
+                                                    "LPBA40_rigidly_registered_label_pairs").replace('.nii', '.hdr'))
             fixed_atlas = self.readVol(
-                self.moving_fixed[self.moving_path[img_index]].replace("LPBA40_rigidly_registered_pairs_histogram_standardization_small",
-                                                                       "LPBA40_rigidly_registered_label_pairs_small").replace('.nii', '.hdr'))
+                self.moving_fixed[self.moving_path[img_index]].replace("LPBA40_rigidly_registered_pairs_histogram_standardization",
+                                                                       "LPBA40_rigidly_registered_label_pairs").replace('.nii', '.hdr'))
 
             moving_img_pytorch, fixed_img_pytorch, moving_atlas_pytorch, fixed_atlas_pytorch = self.transform_train(
                 [moving_img, fixed_img, moving_atlas, fixed_atlas])
@@ -99,10 +103,10 @@ class LPBA40(BaseDataset):
             moving_img = self.whitening(self.readVol(self.moving_path[img_index]))
             fixed_img = self.fixed_img_whiten[self.moving_fixed[self.moving_path[img_index]]]
 
-            moving_atlas = self.readVol(self.moving_path[img_index].replace("LPBA40_rigidly_registered_pairs_histogram_standardization_small",
-                                                                       "LPBA40_rigidly_registered_label_pairs_small").replace('.nii', '.hdr'))
-            fixed_atlas = self.readVol(self.moving_fixed[self.moving_path[img_index]].replace("LPBA40_rigidly_registered_pairs_histogram_standardization_small",
-                                                                       "LPBA40_rigidly_registered_label_pairs_small").replace('.nii', '.hdr'))
+            moving_atlas = self.readVol(self.moving_path[img_index].replace("LPBA40_rigidly_registered_pairs_histogram_standardization",
+                                                                       "LPBA40_rigidly_registered_label_pairs").replace('.nii', '.hdr'))
+            fixed_atlas = self.readVol(self.moving_fixed[self.moving_path[img_index]].replace("LPBA40_rigidly_registered_pairs_histogram_standardization",
+                                                                       "LPBA40_rigidly_registered_label_pairs").replace('.nii', '.hdr'))
 
             # Fuse small regions to a big one.
             for idx, i in enumerate(good_labels_list, start=1):
