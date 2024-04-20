@@ -44,16 +44,21 @@ opencv-python               4.2.0.32
    python preprocessing_lpba40.py
    ```
    
-   output results:
+   output small image results:
    
    `datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small`  
    `datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_small`
+
+   output large image results:
+   
+   `datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_large`  
+   `datasets/LPBA40/LPBA40_rigidly_registered_label_pairs_large`
    
    This step aims to standardize the distribute of all images in a similar range:  
    <img src="https://github.com/lihaoliu-cambridge/lihaoliu-cambridge.github.io/blob/master/pic/papers/unsupervised-segmentation-histogram_standardization.png" width="360"/>  
    
    
-5. Train the model:
+6. Train the model:
  
    ```shell
    cd ..
@@ -61,7 +66,7 @@ opencv-python               4.2.0.32
 
    ```
 
-6. Test the saved model:
+7. Test the saved model:
  
    ```shell
    python test_dice.py  --no_html  --dataroot ./datasets/LPBA40/LPBA40_rigidly_registered_pairs_histogram_standardization_small  --dataset_mode lpba40_contrastive_learning  --batchSize 1  --model registration_model_contrastive_learning  --name lpba40_contrastive_learning
